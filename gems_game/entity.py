@@ -34,20 +34,74 @@ class EntityRecord(object):
 class EntityRecordStore(object):
 
     def __init__(self):
-        """
-        { entity_record : {component_cls : component} }
-        """
+        # { entity_record : {component_cls : component} }
         self.records = dict()
+        # List of components need to be synced
+        self.desynced_components = list()
+
+    def enter(self, entity_rec):
+        """
+        Register an entity with no components
+        """
+        self.add(entity_rec, None)
+
+    def drop(self, entity_rec):
+        """
+        Unregister an entity and returns 'True' if it was successfully
+        dropped. 
+        """
+        if entity_rec is None:
+            return False
+
+        entity_dropped = False
+        comps_dict = get_components(entity_rec)
+        if comps_dict is not None and len(comps_dict) > 0:
+            values = comps_dict.values()
+
+            for cp in values:
+                self.remove(entity_rec, cp)
+
+        del records[entity_rec]
+        entity_dropped = True
+        self.on_remove(entity_rec)
+        return entity_dropped
 
     def add(self, entity_rec, component):
         """
         Attach a specific component to an entity
         """
+        entity_registered = True
+        component_attached = False
+
+        # If there is an entity and not this one, remove it first
         if component is not None:
             old_owner = component.owner
             if old_owner is not None:
                 if old_owner != entity_rec:
-                    pass
+                    self.remove(old_owner, component)
+
+        comps_dict = get_components(entity_rec)
+        if comps_dict is None:
+            comps_dict = dict()
+            entity_registered = False
+            self.records[entity_rec] = comps_dict
+        
+        if component is not None:
+            cp_cls = type(component)
+            if not entity_registered or cp_cls not in comps_dict:
+                comps_dict[cp_cls] = component
+
+                if component.owner is None or component.owner != entity_rec:
+                    component.owner = entity_rec
+
+                self.prepare_components_for_sync(component)
+
+                component_attached = True
+
+        if not entity_registered:
+            on_enter(entity_rec)
+
+        return component_attached
 
     def remove(self, entity_rec, component):
         """
@@ -62,7 +116,7 @@ class EntityRecordStore(object):
 
         comp_removed = False
         comps_dict = get_components(entity_rec)
-        if comps is not None and len(comps) > 0:
+        if comps_dict is not None and len(comps_dict) > 0:
             comp_cls = type(component)
 
             if comp_cls in comps_dict:
@@ -74,6 +128,12 @@ class EntityRecordStore(object):
 
         return comp_removed
 
+    def on_enter(self, entity_rec):
+        pass
+
+    def on_remove(self, entity_rec):
+        pass
+
     def get_components(self, entity_rec):
         components = dict()
 
@@ -81,6 +141,12 @@ class EntityRecordStore(object):
             components = self.records[entity_rec]
 
         return components
+
+    def prepare_components_for_sync(self, component):
+        """
+        """
+        if component not in self.desynced_components:
+            self.desynced_components.append(component)
 
 class Entity(object):
 
