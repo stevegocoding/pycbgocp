@@ -35,7 +35,7 @@ class EntityRecordStore(object):
 
     def __init__(self):
         """
-        { entity_record : {component_type : component_cls} }
+        { entity_record : {component_cls : component} }
         """
         self.records = dict()
 
@@ -60,9 +60,19 @@ class EntityRecordStore(object):
         if component.owner is not None and component.owner != entity_rec:
             return False
 
+        comp_removed = False
+        comps_dict = get_components(entity_rec)
+        if comps is not None and len(comps) > 0:
+            comp_cls = type(component)
+
+            if comp_cls in comps_dict:
+                del comps_dict[comp_cls]
+                comp_removed = True
         
+        if component.owner is not None:
+            component.owner = None
 
-
+        return comp_removed
 
     def get_components(self, entity_rec):
         components = dict()
