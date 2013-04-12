@@ -1,12 +1,14 @@
 
 class ComponentSyncTriggerPred(object):
     
-    def __init__(self, component_cls, component):
+    def __init__(self, component_cls):
         self.cp_cls = component_cls
-        self.cp = component
 
-    def __call__(self):
-        return isinstance(self.cp, self.cp_cls)
+    def __call__(self, component):
+        if component is not None:
+            return isinstance(component, self.cp_cls)
+        else:
+            return False
 
 
 class Component(object):
@@ -31,6 +33,13 @@ class Component(object):
 
     def on_removed(self, params):
         pass
+
+    def need_sync(self):
+        """
+        The component is considered out-of-sync if it is not attached
+        to any entity
+        """
+        return self.owner is None or self.owner.has_component(self)
 
     @property
     def owner(self):

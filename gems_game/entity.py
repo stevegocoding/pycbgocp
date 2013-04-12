@@ -25,10 +25,16 @@ class EntityRecord(object):
 
     def __init__(self, name):
         self.name = name
+        # components map : {name : component}
+        self.components = dict()
 
     @property
     def name(self):
         return self.name
+
+    def has_component(self, component):
+        if component is not None:
+            return component in self.components.values()
 
 
 class EntityRecordStore(object):
@@ -41,6 +47,7 @@ class EntityRecordStore(object):
         self._desynced_components = list()
 
         # Dictionary of the triggers and handlers
+        # _triggers is a dictionary like {trigger_pred : event_hook}
         self._triggers = dict()
 
     def enter(self, entity_rec):
@@ -155,19 +162,15 @@ class EntityRecordStore(object):
     def synchronize(self):
         if len(self._desynced_components) > 0:
             for trigger_pred in self._triggers.keys():
-                pass
+                comps = []
+                for cp in self._desynced_components:
+                    if trigger_pred(cp):
+                        comps.append(cp)
+
+                if len(comps) > 0:
+                    self._triggers[trigger_pred](ComponentSyncEventArgs(comps))
 
 
-class Entity(object):
-
-    def __init__(self):
-        self.component_map = dict()
-
-    def attach_component(sefl, component):
-        pass
-
-    def detach_component(self, name):
-        pass
 
 class GemsBoard(Entity):
     '''
