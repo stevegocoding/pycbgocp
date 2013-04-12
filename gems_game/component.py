@@ -1,4 +1,14 @@
 
+class ComponentSyncTriggerPred(object):
+    
+    def __init__(self, component_cls, component):
+        self.cp_cls = component_cls
+        self.cp = component
+
+    def __call__(self):
+        return isinstance(self.cp, self.cp_cls)
+
+
 class Component(object):
 
     _allocated_id = 0
@@ -36,6 +46,7 @@ class Component(object):
 
     def is_registered(component_cls):
         return component_cls in _components_registry.values()
+
 
 class RenderComponent(Component):
     '''Rendering component for all game objects'''

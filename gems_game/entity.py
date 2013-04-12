@@ -36,8 +36,12 @@ class EntityRecordStore(object):
     def __init__(self):
         # { entity_record : {component_cls : component} }
         self.records = dict()
+
         # List of components need to be synced
-        self.desynced_components = list()
+        self._desynced_components = list()
+
+        # Dictionary of the triggers and handlers
+        self._triggers = dict()
 
     def enter(self, entity_rec):
         """
@@ -145,8 +149,14 @@ class EntityRecordStore(object):
     def prepare_components_for_sync(self, component):
         """
         """
-        if component not in self.desynced_components:
-            self.desynced_components.append(component)
+        if component not in self._desynced_components:
+            self._desynced_components.append(component)
+
+    def synchronize(self):
+        if len(self._desynced_components) > 0:
+            for trigger_pred in self._triggers.keys():
+                pass
+
 
 class Entity(object):
 
