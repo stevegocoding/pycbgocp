@@ -1,15 +1,14 @@
+class EventArgs(object):
+    pass
+
 
 class EventHook(object):
     def __init__(self, handlers):
         self.handlers = handlers
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, event_args):
         for f in self.handlers:
-            f(args, kwargs)
-
-
-class EventArgs(object):
-    pass
+            f(event_args)
 
 
 class ComponentSyncEventArgs(EventArgs):
