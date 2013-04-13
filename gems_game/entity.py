@@ -1,7 +1,7 @@
 
 class EntityDefinition(object):
-
     def __init__(self):
+        # Definitions is like: {def_name : list of component_cls}
         self.definitions = dict();
 
     def define(self, def_name, component_cls_lst):
@@ -23,10 +23,13 @@ class EntityDefinition(object):
 
 class EntityRecord(object):
 
-    def __init__(self, name):
+    def __init__(self, name, entity_registry):
         self.name = name
         # components map : {name : component}
         self.components = dict()
+
+        # Entity Registry
+        self.entity_registry = entity_registry
 
     @property
     def name(self):
@@ -36,9 +39,35 @@ class EntityRecord(object):
         if component is not None:
             return component in self.components.values()
 
+    def need_sync(self):
+        """
+        The entity is considered out-of-sync when it is not registered
+        in a registery, and/or has no name
+        """
+        return (self.name is None or 
+                self.entity_registry is None or
+                not self.entity_registry.contains(self))
+
+    def synchronize(self):
+        if self.entity_registry is not None:
+            if self.entity_registry.contains(self):
+                self.entity_registry.enter(self)
+
+    def __str__(self):
+        output_str = ""
+        comps_dict = self.entity_registry.get_components(self)
+        if comps_dict is not None and len(comps_dict) > 0:
+            sep_str = ", "
+            output_str = ""
+            comps = comps_dict.values()
+
+            for cp in comps:
+                pass
+
+        return output_str
+
 
 class EntityRecordStore(object):
-
     def __init__(self):
         # { entity_record : {component_cls : component} }
         self.records = dict()
@@ -47,8 +76,12 @@ class EntityRecordStore(object):
         self._desynced_components = list()
 
         # Dictionary of the triggers and handlers
-        # _triggers is a dictionary like {trigger_pred : event_hook}
+        # _triggers is a dictionary like {trigger_pred : event_handler}
         self._triggers = dict()
+
+        # Handlers
+        self.on_entity_entered = None
+        self.on_entity_removed = None
 
     def enter(self, entity_rec):
         """
@@ -67,14 +100,18 @@ class EntityRecordStore(object):
         entity_dropped = False
         comps_dict = get_components(entity_rec)
         if comps_dict is not None and len(comps_dict) > 0:
-            values = comps_dict.values()
+            cp_instances = comps_dict.values()
 
-            for cp in values:
+            # Remove the components first
+            for cp in cp_instances:
                 self.remove(entity_rec, cp)
 
+        # Remove the entity
         del records[entity_rec]
         entity_dropped = True
-        self.on_remove(entity_rec)
+
+        self.on_removed(EntityEventArgs(entity_rec))
+
         return entity_dropped
 
     def add(self, entity_rec, component):
@@ -110,7 +147,7 @@ class EntityRecordStore(object):
                 component_attached = True
 
         if not entity_registered:
-            on_enter(entity_rec)
+            self.on_entered(EntityEventArgs(entity_rec))
 
         return component_attached
 
@@ -137,13 +174,17 @@ class EntityRecordStore(object):
         if component.owner is not None:
             component.owner = None
 
+        self.prepare_components_for_sync(component)
+
         return comp_removed
 
-    def on_enter(self, entity_rec):
-        pass
+    def on_entered(self, sync_event_args):
+        if self.on_entity_entered is not None:
+            self.on_entity_entered(sync_event_args)
 
-    def on_remove(self, entity_rec):
-        pass
+    def on_removed(self, sync_event_args):
+        if self.on_entity_removed is not None:
+            self.on_entity_removed(sync_event_args)
 
     def get_components(self, entity_rec):
         components = dict()
@@ -152,6 +193,13 @@ class EntityRecordStore(object):
             components = self.records[entity_rec]
 
         return components
+
+    def set_trigger(self, predicate, handler):
+        self._triggers[predicate] = handler
+
+    def clear_trigger(self, predicate):
+        if predicate in self._triggers:
+            del self._triggers
 
     def prepare_components_for_sync(self, component):
         """
@@ -170,9 +218,13 @@ class EntityRecordStore(object):
                 if len(comps) > 0:
                     self._triggers[trigger_pred](ComponentSyncEventArgs(comps))
 
+            self._desynced_components.clear()
+
+    def contains(self, entity_rec):
+        return entity_rec in self.records
 
 
-class GemsBoard(Entity):
+class GemsBoard(object):
     '''
     The gems' borard defines the coordinate system for all the gems
     in this board. It contains the a group of cells that represents 
@@ -185,7 +237,7 @@ class GemsBoard(Entity):
         self.cells = list()
 
 
-class Cell(Entity):
+class Cell(object):
     '''The cell is unit in a board.'''
 
     def __init__(self, board):
@@ -195,7 +247,7 @@ class Cell(Entity):
         self.elements = list()
 
 
-class Gem(Entity):
+class Gem(object):
 
     def __init__(self, type_id, image):
         self.state = State()

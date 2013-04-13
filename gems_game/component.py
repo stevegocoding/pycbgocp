@@ -21,6 +21,10 @@ class Component(object):
         The entity that this component is currently attached on
         """
         self.owner = None
+        self._previous_owner = None
+
+        self.on_component_attached = None
+        self.on_component_dettached = None
 
     def draw(self):
         pass
@@ -28,11 +32,13 @@ class Component(object):
     def process(self):
         pass
 
-    def on_attached(self, params):
-        pass
+    def on_attached(self, state_event_args):
+        if self.on_component_attached is not None:
+            self.on_component_attached(state_event_args)
 
-    def on_removed(self, params):
-        pass
+    def on_dettached(self, state_event_args):
+        if self.on_component_dettached is not None:
+            self.on_component_dettached(state_event_args)
 
     def need_sync(self):
         """
@@ -45,6 +51,30 @@ class Component(object):
     def owner(self):
         return self.owner
 
+    @owner.setter
+    def owner(self, value):
+        require_sync = (self._previous_owner is not None and 
+                        self._previous_owner.has_component(self))
+
+        if require_sync:
+            raise Exception("Component has to be synchronized before further\
+                            changes can happen")
+        else:
+            if self.owner is None or self.owner != value:
+                self.__setattr__("_previous_owner", self.owner)
+                self.__setattr__("owner", value)
+
+                state_change_event = \
+                    ComponentStateEventArgs(self.owner, self._previous_owner)
+
+                if self.owner is not None:
+                    self.on_attached(state_change_event)
+                else:
+                    self.on_dettached(state_change_event)
+
+    def __setattr__(self, name, value):
+        self.__dict__[name] = value
+
     def create(component_cls):
         return component_cls()
 
@@ -56,6 +86,9 @@ class Component(object):
     def is_registered(component_cls):
         return component_cls in _components_registry.values()
 
+    def __str__(self):
+        output_str = ""
+        return output_str
 
 class RenderComponent(Component):
     '''Rendering component for all game objects'''
