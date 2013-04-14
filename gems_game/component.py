@@ -87,7 +87,7 @@ class Component(object):
         return component_cls in _components_registry.values()
 
     def __str__(self):
-        output_str = ""
+        output_str = "{0} : {1}".format(type(self).__name__, "*" if self.need_sync else "")
         return output_str
 
 class RenderComponent(Component):

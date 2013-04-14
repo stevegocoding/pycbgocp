@@ -1,3 +1,4 @@
+import uuid
 
 class EntityDefinition(object):
     def __init__(self):
@@ -53,18 +54,58 @@ class EntityRecord(object):
             if self.entity_registry.contains(self):
                 self.entity_registry.enter(self)
 
+    def add(self, component):
+        if self.entity_registry is not None:
+            self.entity_registry.add(self, component)
+
+
     def __str__(self):
         output_str = ""
         comps_dict = self.entity_registry.get_components(self)
         if comps_dict is not None and len(comps_dict) > 0:
-            sep_str = ", "
-            output_str = ""
             comps = comps_dict.values()
-
+            s_lst = []
             for cp in comps:
-                pass
+                s = "{0},".format(str(cp))
+                s_lst.append(s)
 
-        return output_str
+        return "".join(s_lst)
+
+
+class Entity(object):
+
+    # Entity Definitions {def_name : list_of_component_classes}
+    _definitions = EntityDefinition()
+
+    def create(name, entity_registry):
+        entity_rec = EntityRecord(name, registery)
+
+        entity_rec.synchronize()
+
+        return entity_rec
+
+    def create(components):
+        return Entity.create(Entity.get_guid(), components)
+
+    def create(name, components):
+        return Entity.create(name, EntityRegistry.get_current(), components)
+
+    def create(name, entity_registry, components):
+        entity_rec = Entity.create(name, entity_registry)
+
+        for cp in components:
+            entity_rec.add(cp)
+
+        return entity_rec
+
+    def define(def_name, component_classes):
+        _definitions.define(def_name, component_classes)
+
+    def undefine(def_name):
+        _definitions.undefine(def_name)
+
+    def get_guid():
+        return str(uuid.uuid())
 
 
 class EntityRecordStore(object):
@@ -222,6 +263,15 @@ class EntityRecordStore(object):
 
     def contains(self, entity_rec):
         return entity_rec in self.records
+
+
+class EntityRegistry(object):
+
+    _default_registry = EntityRecordStore()
+    _active_registry = _default_registry
+
+    def get_current():
+        return _active_registry
 
 
 class GemsBoard(object):
