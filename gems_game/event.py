@@ -49,6 +49,13 @@ class EntityEventArgs(EventArgs):
     def entity_rec(self):
         return self.entity_rec
 
+    @entity_rec.setter
+    def entity_rec(self, value):
+        self.__setattr__("entity_rec", value)
+
+    def __setattr__(self, name, value):
+        self.__dict__[name] = value
+
 class ComponentStateEventArgs(EntityEventArgs):
     def __init__(self, owner, previous_owner):
         super(ComponentStateEventArgs, self).__init__(owner)

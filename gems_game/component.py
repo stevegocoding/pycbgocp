@@ -49,7 +49,7 @@ class Component(object):
 
     @property
     def owner(self):
-        return self.owner
+        return self.__getattr__("owner")
 
     @owner.setter
     def owner(self, value):
@@ -74,6 +74,9 @@ class Component(object):
 
     def __setattr__(self, name, value):
         self.__dict__[name] = value
+
+    def __getattr__(self, name):
+        return self.__dict__[name]
 
     def create(component_cls):
         return component_cls()

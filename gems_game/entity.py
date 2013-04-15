@@ -1,4 +1,5 @@
 import uuid
+from event import EntityEventArgs
 
 class EntityDefinition(object):
     def __init__(self):
@@ -17,15 +18,17 @@ class EntityDefinition(object):
         if def_name in self.definitions:
             component_cls_lst = self.definitions[def_name]
             for component_cls in component_cls_lst:
-                if Component.is_registered(component_cls):
-                    entity_rec.attach_component(Component.create(component_cls))
+                    entity_rec.add(component_cls())
             return entity_rec
+        return entity_rec
 
 
 class EntityRecord(object):
 
     def __init__(self, name, entity_registry):
+
         self.name = name
+
         # components map : {name : component}
         self.components = dict()
 
@@ -35,6 +38,11 @@ class EntityRecord(object):
     @property
     def name(self):
         return self.name
+
+    @name.setter
+    def name(self, value):
+        #setattr(self, "name", value);
+        self._name = value
 
     def has_component(self, component):
         if component is not None:
@@ -51,7 +59,7 @@ class EntityRecord(object):
 
     def synchronize(self):
         if self.entity_registry is not None:
-            if self.entity_registry.contains(self):
+            if not self.entity_registry.contains(self):
                 self.entity_registry.enter(self)
 
     def add(self, component):
@@ -62,11 +70,11 @@ class EntityRecord(object):
     def __str__(self):
         output_str = ""
         comps_dict = self.entity_registry.get_components(self)
+        s_lst = []
         if comps_dict is not None and len(comps_dict) > 0:
             comps = comps_dict.values()
-            s_lst = []
             for cp in comps:
-                s = "{0},".format(str(cp))
+                s = "{0} | ".format(str(cp))
                 s_lst.append(s)
 
         return "".join(s_lst)
@@ -77,33 +85,32 @@ class Entity(object):
     # Entity Definitions {def_name : list_of_component_classes}
     _definitions = EntityDefinition()
 
-    def create(name, entity_registry):
-        entity_rec = EntityRecord(name, registery)
+    @staticmethod
+    def create(name, entity_registry, components):
+        entity_rec = EntityRecord(name, entity_registry)
 
         entity_rec.synchronize()
 
-        return entity_rec
-
-    def create(components):
-        return Entity.create(Entity.get_guid(), components)
-
-    def create(name, components):
-        return Entity.create(name, EntityRegistry.get_current(), components)
-
-    def create(name, entity_registry, components):
-        entity_rec = Entity.create(name, entity_registry)
-
-        for cp in components:
-            entity_rec.add(cp)
+        if components is not None:
+            for cp in components:
+                entity_rec.add(cp)
 
         return entity_rec
 
+    @staticmethod
+    def create_from_def(def_name, name):
+        entity_rec = Entity.create(name, EntityRegistry._active_registry, None)
+        return Entity._definitions.make(def_name, entity_rec)
+
+    @staticmethod
     def define(def_name, component_classes):
-        _definitions.define(def_name, component_classes)
+        Entity._definitions.define(def_name, component_classes)
 
+    @staticmethod
     def undefine(def_name):
-        _definitions.undefine(def_name)
+        Entity._definitions.undefine(def_name)
 
+    @staticmethod
     def get_guid():
         return str(uuid.uuid())
 
@@ -169,7 +176,7 @@ class EntityRecordStore(object):
                 if old_owner != entity_rec:
                     self.remove(old_owner, component)
 
-        comps_dict = get_components(entity_rec)
+        comps_dict = self.get_components(entity_rec)
         if comps_dict is None:
             comps_dict = dict()
             entity_registered = False
@@ -187,6 +194,7 @@ class EntityRecordStore(object):
 
                 component_attached = True
 
+        # If this entity is not registered, and do it now
         if not entity_registered:
             self.on_entered(EntityEventArgs(entity_rec))
 
@@ -228,12 +236,10 @@ class EntityRecordStore(object):
             self.on_entity_removed(sync_event_args)
 
     def get_components(self, entity_rec):
-        components = dict()
-
         if entity_rec in self.records:
-            components = self.records[entity_rec]
-
-        return components
+            return self.records[entity_rec]
+        else:
+            return None
 
     def set_trigger(self, predicate, handler):
         self._triggers[predicate] = handler
@@ -270,8 +276,9 @@ class EntityRegistry(object):
     _default_registry = EntityRecordStore()
     _active_registry = _default_registry
 
+    @staticmethod
     def get_current():
-        return _active_registry
+        return EntityRegistry._active_registry
 
 
 class GemsBoard(object):
