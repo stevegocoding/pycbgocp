@@ -212,7 +212,7 @@ class EntityRecordStore(object):
             return False
 
         comp_removed = False
-        comps_dict = get_components(entity_rec)
+        comps_dict = self.get_components(entity_rec)
         if comps_dict is not None and len(comps_dict) > 0:
             comp_cls = type(component)
 
@@ -265,7 +265,7 @@ class EntityRecordStore(object):
                 if len(comps) > 0:
                     self._triggers[trigger_pred](ComponentSyncEventArgs(comps))
 
-            self._desynced_components.clear()
+            del self._desynced_components[0:len(self._desynced_components)]
 
     def contains(self, entity_rec):
         return entity_rec in self.records

@@ -36,4 +36,9 @@ if __name__ == "__main__":
 
     player_cps = EntityRegistry.get_current().get_components(player_entity)
 
-    print player_cps
+    monster_entity.add(player_cps[ShootComponent])
+
+    EntityRegistry.get_current().synchronize()
+
+    print str(player_entity)
+    print str(monster_entity)
