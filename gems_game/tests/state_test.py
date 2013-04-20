@@ -112,7 +112,7 @@ class TestGameView(cocos.layer.Layer):
         self.imgs = imgs
 
         self.fps_sync = FixedStepLoop(self.process, 1.0/30, 1.0/10)
-        self.fps_sync2 = FPSSync(30)
+        self.fps_sync2 = FPSSync(60)
 
         self.schedule(self.process)
 

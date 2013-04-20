@@ -1,0 +1,71 @@
+<resource>
+    <imageatlas id="male_walk" file="./asset/male_walkcycle.png" size="576x256">
+        <image id="male_walk_n_00" offset="0,0" size="64x64"></image>
+        <image id="male_walk_n_01" offset="64,0" size="64x64"></image>
+        <image id="male_walk_n_02" offset="128,0" size="64x64"></image>
+        <image id="male_walk_n_03" offset="192,0" size="64x64"></image>
+        <image id="male_walk_n_04" offset="256,0" size="64x64"></image>
+        <image id="male_walk_n_05" offset="320,0" size="64x64"></image>
+        <image id="male_walk_n_06" offset="384,0" size="64x64"></image>
+        <image id="male_walk_n_07" offset="448,0" size="64x64"></image>
+        <image id="male_walk_n_08" offset="512,0" size="64x64"></image>
+
+        <image id="male_walk_w_00" offset="0,64" size="64x64"></image>
+        <image id="male_walk_w_01" offset="64,64" size="64x64"></image>
+        <image id="male_walk_w_02" offset="128,64" size="64x64"></image>
+        <image id="male_walk_w_03" offset="192,64" size="64x64"></image>
+        <image id="male_walk_w_04" offset="256,64" size="64x64"></image>
+        <image id="male_walk_w_05" offset="320,64" size="64x64"></image>
+        <image id="male_walk_w_06" offset="384,64" size="64x64"></image>
+        <image id="male_walk_w_07" offset="448,64" size="64x64"></image>
+        <image id="male_walk_w_08" offset="512,64" size="64x64"></image>
+
+        <image id="male_walk_s_00" offset="0,128" size="64x64"></image>
+        <image id="male_walk_s_01" offset="64,128" size="64x64"></image>
+        <image id="male_walk_s_02" offset="128,128" size="64x64"></image>
+        <image id="male_walk_s_03" offset="192,128" size="64x64"></image>
+        <image id="male_walk_s_04" offset="256,128" size="64x64"></image>
+        <image id="male_walk_s_05" offset="320,128" size="64x64"></image>
+        <image id="male_walk_s_06" offset="384,128" size="64x64"></image>
+        <image id="male_walk_s_07" offset="448,128" size="64x64"></image>
+        <image id="male_walk_s_08" offset="512,128" size="64x64"></image>
+    </imageatlas>
+
+    <animation>
+        <sequence name="male_walk_n">
+            <frame id="male_walk_n_00"></frame>
+            <frame id="male_walk_n_01"></frame>
+            <frame id="male_walk_n_02"></frame>
+            <frame id="male_walk_n_03"></frame>
+            <frame id="male_walk_n_04"></frame>
+            <frame id="male_walk_n_05"></frame>
+            <frame id="male_walk_n_06"></frame>
+            <frame id="male_walk_n_07"></frame>
+            <frame id="male_walk_n_08"></frame>
+        </sequence>
+
+        <sequence name="male_walk_w">
+            <frame id="male_walk_w_00"></frame>
+            <frame id="male_walk_w_01"></frame>
+            <frame id="male_walk_w_02"></frame>
+            <frame id="male_walk_w_03"></frame>
+            <frame id="male_walk_w_04"></frame>
+            <frame id="male_walk_w_05"></frame>
+            <frame id="male_walk_w_06"></frame>
+            <frame id="male_walk_w_07"></frame>
+            <frame id="male_walk_w_08"></frame>
+        </sequence>
+
+        <sequence name="male_walk_s">
+            <frame id="male_walk_s_00"></frame>
+            <frame id="male_walk_s_01"></frame>
+            <frame id="male_walk_s_02"></frame>
+            <frame id="male_walk_s_03"></frame>
+            <frame id="male_walk_s_04"></frame>
+            <frame id="male_walk_s_05"></frame>
+            <frame id="male_walk_s_06"></frame>
+            <frame id="male_walk_s_07"></frame>
+            <frame id="male_walk_s_08"></frame>
+        </sequence>
+    </animation>
+</resource>
