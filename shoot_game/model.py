@@ -1,52 +1,19 @@
-import cocos
-
-from entity import EntityRecord
-from component import Component
-
-class SceneComponent(Component):
-
-    def __init__(self):
-        self._sprite = cocos.sprite.Sprite(None)
+import entity
 
 
-class InputComponent(Component):
+class PlayerEntity(entity.EntityRecord):
+    def __init__(self, name, entity_registry):
+        entity.EntityRecord.__init__(self, name, entity_registry)
 
-    def __init__(self):
+        self._renderer = self.get_
+
+
+    def visit(self):
+        self.process()
+        self.render()
+
+    def process(self):
         pass
 
-class SpawnComponent(Component):
-
-    def __init__(self):
-        pass
-
-class ZombieAIComponent(Component):
-    def __init__(self):
-        pass
-
-
-class PlayerEntity(EntityRecord):
-
-    def __init__(self):
-        pass
-
-    def shoot(self):
-        pass
-
-    def move(self):
-        pass
-
-class GameWorld(EntityRecord):
-
-    def __init__(self):
-        pass
-
-class ZombieEntity(EntityRecord):
-
-    def __init__(self):
-        pass
-
-
-class BulletEntity(EntityRecord):
-
-    def __init__(self):
+    def render(self):
         pass

@@ -124,6 +124,9 @@ class SpriteRenderer(component.Component):
 
         return max_frames
 
+    def set_position(self, (x, y)):
+        self.renderable_object.position = (x, y)
+
     @property
     def current_state(self):
         return self._current_state
@@ -141,32 +144,19 @@ class SpriteRenderer(component.Component):
         return self._sprites_batch
 
 
-class GameView(component.Component):
-    def __init__(self):
-        self._layer = GameLayer()
-
-    def add_renderable(self, renderable):
-        self._layer.add(renderable)
-
-    def remove_renderable(self, renderable):
-        self._layer._remove(renderable)
-
-
 class GameLayer(cocos.layer.Layer):
     def __init__(self):
         cocos.layer.Layer.__init__(self)
         self._fps_sync = utils.FPSSync(30)
+
         self.scheduled(self.process)
 
     def process(self, dt):
         self._fps_sync.update(dt)
 
     def visit(self):
-        if self._fps_sync.get_frame_count() <= 0:
+        ticks = self._fps_sync.get_frame_count()
+        if ticks <= 0:
             return 0
 
         cocos.layer.Layer.visit(self)
-
-
-
-

@@ -1,14 +1,16 @@
 import uuid
-from event import EntityEventArgs
+import cocos.cocosnode
+import event
+
 
 class EntityDefinition(object):
     def __init__(self):
         # Definitions is like: {def_name : list of component_cls}
-        self.definitions = dict();
+        self.definitions = dict()
 
     def define(self, def_name, component_cls_lst):
         if def_name is not None and component_cls_lst is not None:
-            self.definitions[def_name] = component_cls_lst;
+            self.definitions[def_name] = component_cls_lst
 
     def undefine(self, def_name):
         if def_name in self.definitions:
@@ -23,7 +25,7 @@ class EntityDefinition(object):
         return entity_rec
 
 
-class EntityRecord(object):
+class EntityRecord(cocos.cocosnode.CocosNode):
 
     def __init__(self, name, entity_registry):
 
@@ -34,6 +36,8 @@ class EntityRecord(object):
 
         # Entity Registry
         self.entity_registry = entity_registry
+
+        cocos.cocosnode.CocosNode.__init__(self)
 
     @property
     def name(self):
@@ -66,9 +70,7 @@ class EntityRecord(object):
         if self.entity_registry is not None:
             self.entity_registry.add(self, component)
 
-
     def __str__(self):
-        output_str = ""
         comps_dict = self.entity_registry.get_components(self)
         s_lst = []
         if comps_dict is not None and len(comps_dict) > 0:
@@ -78,6 +80,9 @@ class EntityRecord(object):
                 s_lst.append(s)
 
         return "".join(s_lst)
+
+    def visit(self):
+        pass
 
 
 class Entity(object):
@@ -145,8 +150,7 @@ class EntityRecordStore(object):
         if entity_rec is None:
             return False
 
-        entity_dropped = False
-        comps_dict = get_components(entity_rec)
+        comps_dict = self.get_components(entity_rec)
         if comps_dict is not None and len(comps_dict) > 0:
             cp_instances = comps_dict.values()
 
@@ -155,10 +159,10 @@ class EntityRecordStore(object):
                 self.remove(entity_rec, cp)
 
         # Remove the entity
-        del records[entity_rec]
+        del self.records[entity_rec]
         entity_dropped = True
 
-        self.on_removed(EntityEventArgs(entity_rec))
+        self.on_removed(event.EntityEventArgs(entity_rec))
 
         return entity_dropped
 
@@ -196,7 +200,7 @@ class EntityRecordStore(object):
 
         # If this entity is not registered, and do it now
         if not entity_registered:
-            self.on_entered(EntityEventArgs(entity_rec))
+            self.on_entered(event.EntityEventArgs(entity_rec))
 
         return component_attached
 
@@ -262,7 +266,6 @@ class EntityRecordStore(object):
         return (self._desynced_components is not None and
                 len(self._desynced_components) > 0) 
 
-
     def synchronize(self):
         if len(self._desynced_components) > 0:
             for trigger_pred in self._triggers.keys():
@@ -272,7 +275,7 @@ class EntityRecordStore(object):
                         comps.append(cp)
 
                 if len(comps) > 0:
-                    self._triggers[trigger_pred](ComponentSyncEventArgs(comps))
+                    self._triggers[trigger_pred](event.ComponentSyncEventArgs(comps))
 
             del self._desynced_components[0:len(self._desynced_components)]
 
@@ -288,34 +291,3 @@ class EntityRegistry(object):
     @staticmethod
     def get_current():
         return EntityRegistry._active_registry
-
-
-class GemsBoard(object):
-    '''
-    The gems' borard defines the coordinate system for all the gems
-    in this board. It contains the a group of cells that represents 
-    a position in the board, in each cell, there could be any type of
-    game elements such as gems, glasses or some blockers that cannot
-    be eliminated.
-    '''
-
-    def __init__(self):
-        self.cells = list()
-
-
-class Cell(object):
-    '''The cell is unit in a board.'''
-
-    def __init__(self, board):
-        self.board = board
-        self.x = 0
-        self.y = 0
-        self.elements = list()
-
-
-class Gem(object):
-
-    def __init__(self, type_id, image):
-        self.state = State()
-        self.grid_pos_x = 0
-        self.grid_pos_y = 0
