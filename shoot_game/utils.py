@@ -85,7 +85,6 @@ class FPSSync(object):
         self.time_stamp = 0
         self.real_time = 0
         self.frame_time = 0
-        self.start()
 
     def start(self):
         self.time_stamp = time.time()

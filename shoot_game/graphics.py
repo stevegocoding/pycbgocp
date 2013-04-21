@@ -1,11 +1,9 @@
+import pyglet.gl
 import cocos.layer
+import cocos.scene
 import cocos.batch
 import component
-import resource
 import utils
-
-resource.SpriteSheetResource.register_factory("imageatlas")
-resource.SpriteSheetResource.register_factory("animation")
 
 
 class SpriteSheetLayer(object):
@@ -49,21 +47,25 @@ class SpriteSheetLayer(object):
 class SpriteRenderer(component.Component):
 
     def __init__(self):
+        component.Component.__init__(self)
         self._current_state = "default"
         self._frame_index = 0
         self._max_frames = 0
-        self._sprites_batch = cocos.batch.BactchNode()
+        self._sprites_batch = cocos.batch.BatchNode()
         self._sprites = []
         self._layers = []
         self._layers_render = []
         self._loop = False
         self._animation_percent = 0
-        self._aabb = cocos.rect.Rect()
+        #self._aabb = cocos.rect.Rect()
 
     def create_layer(self, resource, order_index):
         layer = SpriteSheetLayer(self, resource, order_index)
         self._layers.append(layer)
         self.sort_layers()
+
+        if self.owner is not None:
+            self.owner.add(self.renderable_object)
 
     def reset_frame_data(self):
         for sprite in self._sprites:
@@ -124,6 +126,9 @@ class SpriteRenderer(component.Component):
 
         return max_frames
 
+    def set_position(self, (x, y)):
+        self.renderable_object.position = (x, y)
+
     @property
     def current_state(self):
         return self._current_state
@@ -141,32 +146,27 @@ class SpriteRenderer(component.Component):
         return self._sprites_batch
 
 
-class GameView(component.Component):
+class GameScene(cocos.scene.Scene):
+
+    fps_sync = utils.FPSSync(30)
+
     def __init__(self):
-        self._layer = GameLayer()
+        cocos.scene.Scene.__init__(self)
+        GameScene.fps_sync.start()
 
-    def add_renderable(self, renderable):
-        self._layer.add(renderable)
-
-    def remove_renderable(self, renderable):
-        self._layer._remove(renderable)
-
-
-class GameLayer(cocos.layer.Layer):
-    def __init__(self):
-        cocos.layer.Layer.__init__(self)
-        self._fps_sync = utils.FPSSync(30)
-        self.scheduled(self.process)
+        self.schedule(self.process)
 
     def process(self, dt):
-        self._fps_sync.update(dt)
+        GameScene.fps_sync.update(dt)
 
     def visit(self):
-        if self._fps_sync.get_frame_count() <= 0:
+        ticks = GameScene.fps_sync.get_frame_count()
+        if ticks <= 0:
             return 0
 
-        cocos.layer.Layer.visit(self)
+        print "GameScene visit()"
+        cocos.scene.Scene.visit(self)
 
-
-
-
+    @staticmethod
+    def frame_count():
+        return GameScene.fps_sync.get_frame_count()

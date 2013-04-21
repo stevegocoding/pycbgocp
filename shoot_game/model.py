@@ -1,52 +1,37 @@
-import cocos
-
-from entity import EntityRecord
-from component import Component
-
-class SceneComponent(Component):
-
-    def __init__(self):
-        self._sprite = cocos.sprite.Sprite(None)
+import entity
+import graphics
+import resource
 
 
-class InputComponent(Component):
+if __name__ == "__main__":
 
-    def __init__(self):
-        pass
+    import cocos.director
+    import cocos.layer
 
-class SpawnComponent(Component):
+    consts = {
+        "window" : {
+            "width": 800,
+            "height": 600,
+            "vsync": True,
+            "resizable": True
+        }
+    }
 
-    def __init__(self):
-        pass
+    cocos.director.director.init(**consts["window"])
+    scene = graphics.GameScene()
+    base_layer = cocos.layer.Layer()
 
-class ZombieAIComponent(Component):
-    def __init__(self):
-        pass
+    components = [graphics.SpriteRenderer]
+    entity.Entity.define("TestPlayerDef", components)
+    player = entity.Entity.create_from_def("TestPlayerDef", "player")
 
+    # Load the resource
+    spritesheet_res = resource.load_spritesheet("./asset/male_walkcycle.xml")
+    sprite_renderer = entity.EntityRegistry.get_current().get_component(player, graphics.SpriteRenderer)
+    sprite_renderer.create_layer(spritesheet_res, 0)
+    sprite_renderer.renderable_object.position = (100, 100)
+    base_layer.add(player)
 
-class PlayerEntity(EntityRecord):
+    scene.add(base_layer, z=-1)
 
-    def __init__(self):
-        pass
-
-    def shoot(self):
-        pass
-
-    def move(self):
-        pass
-
-class GameWorld(EntityRecord):
-
-    def __init__(self):
-        pass
-
-class ZombieEntity(EntityRecord):
-
-    def __init__(self):
-        pass
-
-
-class BulletEntity(EntityRecord):
-
-    def __init__(self):
-        pass
+    cocos.director.director.run(scene)

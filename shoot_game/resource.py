@@ -22,7 +22,8 @@ class SpriteSheetResource(cocos.tiles.Resource):
 
     def get_frame_image(self, state, frame):
         if state in self.animations and frame < len(self.animations[state]):
-            return self.animations[state][frame]
+            image = self.get_resource(self.animations[state][frame])
+            return image
         return None
 
     def get_frames_count(self, state):
@@ -85,3 +86,7 @@ def load_spritesheet(filename):
 
     cocos.tiles._cache[filename] = resource
     return resource
+
+
+SpriteSheetResource.register_factory("imageatlas")
+SpriteSheetResource.register_factory("animation")
