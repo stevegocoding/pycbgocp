@@ -32,6 +32,10 @@
     </imageatlas>
 
     <animation>
+        <sequence name = "default">
+            <frame id="male_walk_n_00"></frame>
+        </sequence>
+
         <sequence name="male_walk_n">
             <frame id="male_walk_n_00"></frame>
             <frame id="male_walk_n_01"></frame>

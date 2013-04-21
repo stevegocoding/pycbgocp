@@ -1,12 +1,11 @@
 import time
-import pyglet
 
 class State(object):
     exit_name = "EXIT"
     enter_name = "ENTER"
     changed_name = "CHANGED"
 
-    def __init__(self, id = "machine"):
+    def __init__(self, id="machine"):
         self.id = id;
         self.parent = None
         self.children = {}
@@ -61,7 +60,7 @@ class State(object):
                 self.current_state.return_state = None
 
         self.current_state.tick = 0
-        if (self.current_state.enter_func is not None):
+        if self.current_state.enter_func is not None:
             self.current_state.enter_func(self.current_state)
 
         return self.current_state
@@ -73,37 +72,9 @@ class State(object):
         self.current_state.tick += 1
 
     def exit(self):
-        if self.current_state is not None and \
-            self.current_state.exit_func is not None:
-                self.current_state.exit_func(self.current_state)
+        if self.current_state is not None and self.current_state.exit_func is not None:
+            self.current_state.exit_func(self.current_state)
 
-
-class FixedStepLoop(object):
-    """
-    A fixed time step loop for pyglet.
-    """
-    def __init__(self, update_function, step, max_step):
-        self.update_function = update_function;
-        self.step = step;
-        self.max_step = max_step;
-        self.simulation_time = 0.0 - self.step;
-        self.real_time = 0.0
-        self.frame_time = 0.0
-        self.step_fraction = 0.0
-
-    def tick(self, T):
-        self.real_time += T
-        self.frame_time += T
-
-        if (T > self.max_step):
-            self.simulation_time = self.real_time - self.max_step;
-
-        while self.simulation_time <= self.real_time:
-            self.update_function(self.step)
-            self.simulation_time += self.step;
-
-        self.step_fraction = self.frame_time / self.step
-        self.frame_time = 0.0
 
 class FPSSync(object):
 
@@ -113,14 +84,18 @@ class FPSSync(object):
         self.tick = 0
         self.time_stamp = 0
         self.real_time = 0
+        self.frame_time = 0
         self.start()
 
     def start(self):
         self.time_stamp = time.time()
         self.real_time = self.time_stamp
 
-    def get_frame_count(self, T):
-        self.real_time += T
+    def update(self, frame_time):
+        self.frame_time = frame_time
+
+    def get_frame_count(self):
+        self.real_time += self.frame_time
         this_tick = (self.real_time - self.time_stamp) * self.fps
         self.last_tick = self.tick
         self.tick = this_tick

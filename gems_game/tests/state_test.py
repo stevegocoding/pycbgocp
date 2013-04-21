@@ -12,11 +12,11 @@ import time
 consts = {
     "window" : {
         "width" : 800,
-        "height" : 600, 
+        "height" : 600,
         "vsync" : True,
         "resizable" : True
     }
-} 
+}
 
 class GameObject(cocos.sprite.Sprite):
     IDLE_STATE = "idle_state"
@@ -27,7 +27,7 @@ class GameObject(cocos.sprite.Sprite):
     def __init__(self, img):
         super(GameObject, self).__init__(img)
         self.state = State()
-        
+
         idle_state = State(GameObject.IDLE_STATE)
         idle_state.assign(
                         {
@@ -112,7 +112,7 @@ class TestGameView(cocos.layer.Layer):
         self.imgs = imgs
 
         self.fps_sync = FixedStepLoop(self.process, 1.0/30, 1.0/10)
-        self.fps_sync2 = FPSSync(60)
+        self.fps_sync2 = FPSSync(30)
 
         self.schedule(self.process)
 
@@ -122,7 +122,7 @@ class TestGameView(cocos.layer.Layer):
 
     def draw(self):
         print "draw"
-        time.sleep(0.07)
+        time.sleep(0.03)
 
     def update(self, T):
         output_str = "update() : dt = %f" %(T)
