@@ -39,6 +39,8 @@ class EntityRecord(cocos.cocosnode.CocosNode):
         # Entity Registry
         self.entity_registry = entity_registry
 
+        cocos.cocosnode.CocosNode.__init__(self)
+
     @property
     def name(self):
         return self.name

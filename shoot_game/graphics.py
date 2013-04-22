@@ -160,7 +160,7 @@ class GameScene(cocos.scene.Scene):
         GameScene.fps_sync.update(dt)
 
     def visit(self):
-        ticks = GameScene.fps_sync.get_frame_count()
+        if self._fps_sync.get_frame_count() <= 0:
         if ticks <= 0:
             return 0
 
