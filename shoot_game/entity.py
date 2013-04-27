@@ -39,8 +39,6 @@ class EntityRecord(cocos.cocosnode.CocosNode):
         # Entity Registry
         self.entity_registry = entity_registry
 
-        cocos.cocosnode.CocosNode.__init__(self)
-
     @property
     def name(self):
         return self.name
@@ -145,7 +143,7 @@ class EntityRecordStore(object):
         self._desynced_components = list()
 
         # Dictionary of the triggers and handlers
-        # _triggers is a dictionary like {trigger_pred : event_handler}
+        # _triggers is a dictionary like {trigger_predicate : event_handler}
         self._triggers = dict()
 
         # Handlers
@@ -160,7 +158,7 @@ class EntityRecordStore(object):
 
     def drop(self, entity_rec):
         """
-        Unregister an entity and returns 'True' if it was successfully
+        Un-register an entity and returns 'True' if it was successfully
         dropped. 
         """
         if entity_rec is None:
@@ -184,27 +182,27 @@ class EntityRecordStore(object):
 
     def add(self, entity_rec, component):
         """
-        Attach a specific component to an entity
+        Attaches the specified component to an entity.
         """
         entity_registered = True
         component_attached = False
 
-        # If there is an entity and not this one, remove it first
         if component is not None:
             old_owner = component.owner
-            if old_owner is not None:
-                if old_owner != entity_rec:
-                    self.remove(old_owner, component)
+            if old_owner is not None and old_owner != entity_rec:
+                self.remove(old_owner, component)
 
+        # Get the components registered for this entity record
+        # If there is none, then create one
         comps_dict = self.get_components(entity_rec)
         if comps_dict is None:
             comps_dict = dict()
             entity_registered = False
             self.records[entity_rec] = comps_dict
-        
+
         if component is not None:
             cp_cls = type(component)
-            if not entity_registered or cp_cls not in comps_dict:
+            if cp_cls not in comps_dict:
                 comps_dict[cp_cls] = component
 
                 if component.owner is None or component.owner != entity_rec:
@@ -214,7 +212,7 @@ class EntityRecordStore(object):
 
                 component_attached = True
 
-        # If this entity is not registered, and do it now
+        # If this entity is just registered, we fire the on_enter for this entity
         if not entity_registered:
             self.on_entered(event.EntityEventArgs(entity_rec))
 
@@ -222,8 +220,8 @@ class EntityRecordStore(object):
 
     def remove(self, entity_rec, component):
         """
-        Dettaches the specified component from an entity.
-        Returns "True" if it was successfull.
+        Detach the specified component from an entity.
+        Returns "True" if it was successful.
         """
         if entity_rec is None or component is None:
             return False
@@ -286,8 +284,7 @@ class EntityRecordStore(object):
         This registry is considered out of sync as soon as there are 
         components that have not yet been run through triggers
         """
-        return (self._desynced_components is not None and
-                len(self._desynced_components) > 0) 
+        return self._desynced_components is not None and len(self._desynced_components) > 0
 
     def synchronize(self):
         if len(self._desynced_components) > 0:
