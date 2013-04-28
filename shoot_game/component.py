@@ -67,7 +67,12 @@ class Component(object):
                 self._previous_owner = self._owner
                 self._owner = value
 
-                self.synchronize()
+                state_change_event = event.ComponentStateEventArgs(self._owner, self._previous_owner)
+
+                if self.owner is not None:
+                    self.on_attached(state_change_event)
+                else:
+                    self.on_dettached(state_change_event)
 
     def synchronize(self):
         """
@@ -76,7 +81,7 @@ class Component(object):
         """
         if self.owner is not None:
             if not self.owner.has_component(self):
-                self.owner.add(self)
+                self.owner.attach_component(self)
                 if self.on_component_attached is not None:
                     self.on_component_attached(event.ComponentStateEventArgs(self.owner, self._previous_owner))
         else:

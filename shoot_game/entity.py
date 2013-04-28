@@ -33,9 +33,6 @@ class EntityRecord(cocos.cocosnode.CocosNode):
 
         self.name = name
 
-        # components map : {name : component}
-        self.components = dict()
-
         # Entity Registry
         self.entity_registry = entity_registry
 
@@ -49,13 +46,16 @@ class EntityRecord(cocos.cocosnode.CocosNode):
         self._name = value
 
     def has_component(self, component):
-        if component is not None:
-            return component in self.components.values()
+        if component is not None and self.entity_registry is not None:
+            comps_dict = self.entity_registry.get_components(self)
+            return component in comps_dict.values
+        else:
+            raise Exception("Component or Entity Registry is None!")
 
     def need_sync(self):
         """
         The entity is considered out-of-sync when it is not registered
-        in a registery, and/or has no name
+        in a registry, and/or has no name
         """
         return (self.name is None or 
                 self.entity_registry is None or
@@ -84,7 +84,8 @@ class EntityRecord(cocos.cocosnode.CocosNode):
     def visit(self):
         print "EntityRecord visit()"
         self.process()
-        cocos.cocosnode.CocosNode.visit(self)
+        self.draw()
+        #cocos.cocosnode.CocosNode.visit(self)
 
     def process(self):
         print "EntityRecord process()"
@@ -97,6 +98,10 @@ class EntityRecord(cocos.cocosnode.CocosNode):
             print "PlayerEntity draw()"
             renderer.update_frame(graphics.GameScene.frame_count())
             renderer.render_frame()
+            renderer.renderable_object.visit()
+
+    def on_enter(self):
+        pass
 
 
 class Entity(object):

@@ -62,7 +62,7 @@ class ComponentStateEventArgs(EntityEventArgs):
         self._previouse_owner = previous_owner
 
     @property
-    def previouse_owner(self):
+    def previous_owner(self):
         return self._previouse_owner
 
     @property
