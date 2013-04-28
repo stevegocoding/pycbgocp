@@ -1,3 +1,5 @@
+import event
+
 
 class ComponentSyncTriggerPred(object):
     
@@ -20,9 +22,10 @@ class Component(object):
         """
         The entity that this component is currently attached on
         """
-        self.owner = None
+        self._owner = None
         self._previous_owner = None
 
+        # Delegate called when this component is attached or detached
         self.on_component_attached = None
         self.on_component_detached = None
 
@@ -49,7 +52,7 @@ class Component(object):
 
     @property
     def owner(self):
-        return self.__getattr__("owner")
+        return self._owner
 
     @owner.setter
     def owner(self, value):
@@ -60,23 +63,34 @@ class Component(object):
             raise Exception("Component has to be synchronized before further\
                             changes can happen")
         else:
-            if self.owner is None or self.owner != value:
-                self.__setattr__("_previous_owner", self.owner)
-                self.__setattr__("owner", value)
+            if self._owner is None or self._owner != value:
+                self._previous_owner = self._owner
+                self._owner = value
 
-                state_change_event = \
-                    ComponentStateEventArgs(self.owner, self._previous_owner)
+                state_change_event = event.ComponentStateEventArgs(self._owner, self._previous_owner)
 
                 if self.owner is not None:
                     self.on_attached(state_change_event)
                 else:
                     self.on_dettached(state_change_event)
 
-    def __setattr__(self, name, value):
-        self.__dict__[name] = value
-
-    def __getattr__(self, name):
-        return self.__dict__[name]
+    def synchronize(self):
+        """
+        Ensures that the component becomes synchronized by
+        establishing the appropriate relation to its parent entity.
+        """
+        if self.owner is not None:
+            if not self.owner.has_component(self):
+                self.owner.attach_component(self)
+                if self.on_component_attached is not None:
+                    self.on_component_attached(event.ComponentStateEventArgs(self.owner, self._previous_owner))
+        else:
+            if self._previous_owner is not None:
+                removed = self._previous_owner.remvoe(self)
+                if removed is True:
+                    if self.on_component_detached is not None:
+                        self.on_component_detached(event.ComponentStateEventArgs(self.owner, self._previous_owner))
+                        self._previous_owner = None
 
     @classmethod
     def create(cls, component_cls):

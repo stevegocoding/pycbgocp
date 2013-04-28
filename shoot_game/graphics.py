@@ -59,6 +59,9 @@ class SpriteRenderer(component.Component):
         self._animation_percent = 0
         #self._aabb = cocos.rect.Rect()
 
+        self.on_component_attached = self.on_renderer_attached
+        self.on_component_detached = self.on_renderer_detached
+
     def create_layer(self, resource, order_index):
         layer = SpriteSheetLayer(self, resource, order_index)
         self._layers.append(layer)
@@ -128,6 +131,13 @@ class SpriteRenderer(component.Component):
 
     def set_position(self, (x, y)):
         self.renderable_object.position = (x, y)
+
+    def on_renderer_attached(self, state_event_args):
+        print "Sprite Renderer attached! owner: %s, previous: %s" % (type(state_event_args.owner).__name__,
+                                                                     type(state_event_args.previous_owner).__name__)
+
+    def on_renderer_detached(self, state_event_args):
+        print "Sprite Renderer detached!"
 
     @property
     def current_state(self):
