@@ -135,6 +135,8 @@ class SpriteRenderer(component.Component):
     def on_renderer_attached(self, state_event_args):
         print "Sprite Renderer attached! owner: %s, previous: %s" % (type(state_event_args.owner).__name__,
                                                                      type(state_event_args.previous_owner).__name__)
+        if state_event_args.owner is not None:
+            state_event_args.owner.add(self.renderable_object)
 
     def on_renderer_detached(self, state_event_args):
         print "Sprite Renderer detached!"
@@ -158,21 +160,49 @@ class SpriteRenderer(component.Component):
 
 class GameScene(cocos.scene.Scene):
 
-    fps_sync = utils.FPSSync(30)
+    fps_sync = utils.FPSSync(60)
 
     def __init__(self):
         cocos.scene.Scene.__init__(self)
         GameScene.fps_sync.start()
+        self.schedule(self.update_tick_counter)
 
-        self.schedule(self.process)
+        self.game_entities = []
 
-    def process(self, dt):
+    def add_game_entity(self, entity):
+        pass
+
+    def remove_game_entity(self, entity):
+        pass
+
+    def update_tick_counter(self, dt):
+        print "dt: %f" % dt
         GameScene.fps_sync.update(dt)
 
-    def visit(self):
+    def process(self):
         ticks = GameScene.fps_sync.get_frame_count()
+        print "real_time: %f" % GameScene.fps_sync.real_time
+        print "time_stamp: %f" % GameScene.fps_sync.time_stamp
+        print "ticks1 : %f" % ticks
+        if ticks > 0:
+            process_count = 0
+            print "ticks2 : %f" % ticks
+            while process_count < ticks:
+                print "GameScene process()"
+                process_count += 1
+                for entity in self.game_entities:
+                    entity.process()
+                    process_count += 1
+
+    def render_scene(self):
+        print "GameScene render()"
+
+    def visit(self):
         print "GameScene visit()"
-        cocos.scene.Scene.visit(self)
+        self.process()
+        self.render_scene()
+
+        print "======================"
 
     @staticmethod
     def frame_count():

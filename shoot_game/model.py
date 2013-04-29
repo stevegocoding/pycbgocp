@@ -30,7 +30,7 @@ if __name__ == "__main__":
     sprite_renderer = entity.EntityRegistry.get_current().get_component(player, graphics.SpriteRenderer)
     sprite_renderer.create_layer(spritesheet_res, 0)
     sprite_renderer.renderable_object.position = (100, 100)
-    base_layer.add(player)
+    #base_layer.add(player)
 
     scene.add(base_layer, z=-1)
 

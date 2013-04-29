@@ -80,8 +80,8 @@ class FPSSync(object):
 
     def __init__(self, fps):
         self.fps = fps
-        self.last_tick = 0
-        self.tick = 0
+        self.last_tick = int(0)
+        self.tick = int(0)
         self.time_stamp = 0
         self.real_time = 0
         self.frame_time = 0
@@ -95,7 +95,9 @@ class FPSSync(object):
 
     def get_frame_count(self):
         self.real_time += self.frame_time
-        this_tick = (self.real_time - self.time_stamp) * self.fps
+        this_tick = int((self.real_time - self.time_stamp) * self.fps)
+        if this_tick == self.tick:
+            return 0
         self.last_tick = self.tick
         self.tick = this_tick
-        return self.tick - self.last_tick
+        return int(self.tick - self.last_tick)
