@@ -160,7 +160,7 @@ class SpriteRenderer(component.Component):
 
 class GameScene(cocos.scene.Scene):
 
-    fps_sync = utils.FPSSync(60)
+    fps_sync = utils.FPSSync(30)
 
     def __init__(self):
         cocos.scene.Scene.__init__(self)
@@ -170,7 +170,7 @@ class GameScene(cocos.scene.Scene):
         self.game_entities = []
 
     def add_game_entity(self, entity):
-        pass
+        self.game_entities.append(entity)
 
     def remove_game_entity(self, entity):
         pass
@@ -179,7 +179,7 @@ class GameScene(cocos.scene.Scene):
         print "dt: %f" % dt
         GameScene.fps_sync.update(dt)
 
-    def process(self):
+    def process_scene(self):
         ticks = GameScene.fps_sync.get_frame_count()
         print "real_time: %f" % GameScene.fps_sync.real_time
         print "time_stamp: %f" % GameScene.fps_sync.time_stamp
@@ -192,18 +192,19 @@ class GameScene(cocos.scene.Scene):
                 process_count += 1
                 for entity in self.game_entities:
                     entity.process()
-                    process_count += 1
-
-    def render_scene(self):
-        print "GameScene render()"
 
     def visit(self):
         print "GameScene visit()"
-        self.process()
-        self.render_scene()
+
+        self.process_scene()
+
+        print "GameScene render()"
+
+        cocos.scene.Scene.visit(self)
 
         print "======================"
 
     @staticmethod
     def frame_count():
         return GameScene.fps_sync.get_frame_count()
+

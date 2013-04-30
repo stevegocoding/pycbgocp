@@ -82,10 +82,11 @@ class EntityRecord(cocos.cocosnode.CocosNode):
         return "".join(s_lst)
 
     def visit(self):
-        print "EntityRecord visit()"
-        self.process()
         self.render()
         cocos.cocosnode.CocosNode.visit(self)
+
+    def draw(self):
+        pass
 
     def process(self):
         print "EntityRecord process()"
@@ -93,7 +94,7 @@ class EntityRecord(cocos.cocosnode.CocosNode):
     def render(self):
         renderer = self.entity_registry.get_component(self, graphics.SpriteRenderer)
         if renderer is not None:
-            print "PlayerEntity draw()"
+            print "EntityRecord render()"
             renderer.update_frame(graphics.GameScene.frame_count())
             renderer.render_frame()
 
