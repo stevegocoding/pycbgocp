@@ -1,7 +1,8 @@
-import pyglet.gl
+import time
 import cocos.layer
 import cocos.scene
 import cocos.batch
+import cocos.sprite
 import component
 import utils
 
@@ -44,6 +45,20 @@ class SpriteSheetLayer(object):
         return self._is_hidden
 
 
+class SceneComponent(component.Component):
+    def __init__(self):
+        component.Component.__init__(self)
+        self._cocos_node = cocos.cocosnode.CocosNode()
+
+    @property
+    def position(self):
+        return self._cocos_node.position
+
+    @position.setter
+    def position(self, (x, y)):
+        self._cocos_node.position = (x, y)
+
+
 class SpriteRenderer(component.Component):
 
     def __init__(self):
@@ -51,13 +66,12 @@ class SpriteRenderer(component.Component):
         self._current_state = "default"
         self._frame_index = 0
         self._max_frames = 0
-        self._sprites_batch = cocos.batch.BatchNode()
         self._sprites = []
         self._layers = []
         self._layers_render = []
-        self._loop = False
+        self._loop = True
         self._animation_percent = 0
-        #self._aabb = cocos.rect.Rect()
+        self._position = (0, 0)
 
         self.on_component_attached = self.on_renderer_attached
         self.on_component_detached = self.on_renderer_detached
@@ -67,13 +81,7 @@ class SpriteRenderer(component.Component):
         self._layers.append(layer)
         self.sort_layers()
 
-        if self.owner is not None:
-            self.owner.add(self.renderable_object)
-
     def reset_frame_data(self):
-        for sprite in self._sprites:
-            self._sprites_batch.remove(sprite)
-
         self._sprites = []
         self._max_frames = 0
 
@@ -84,6 +92,11 @@ class SpriteRenderer(component.Component):
     def update_frame(self, animation_ticks):
         self.reset_frame_data()
         self._max_frames = self.get_animation_frames_count()
+
+        scene_node = self.owner.get_component(SceneComponent)
+        if self.owner is not None and scene_node is not None:
+            self._position = scene_node.position
+
         ticks = animation_ticks
         while ticks > 0:
             ticks -= 1
@@ -107,11 +120,12 @@ class SpriteRenderer(component.Component):
                 if frame_img is not None:
                     self._layers_render.append(layer)
                     sprite = cocos.sprite.Sprite(frame_img)
+                    sprite.position = self._position
                     self._sprites.append(sprite)
-                    self._sprites_batch.add(sprite)
 
     def render_frame(self):
-        pass
+        for sprite in self._sprites:
+            sprite.draw()
 
     def sort_layers(self):
         if len(self._layers) > 1:
@@ -129,14 +143,11 @@ class SpriteRenderer(component.Component):
 
         return max_frames
 
-    def set_position(self, (x, y)):
-        self.renderable_object.position = (x, y)
-
     def on_renderer_attached(self, state_event_args):
         print "Sprite Renderer attached! owner: %s, previous: %s" % (type(state_event_args.owner).__name__,
                                                                      type(state_event_args.previous_owner).__name__)
-        if state_event_args.owner is not None:
-            state_event_args.owner.add(self.renderable_object)
+        #if state_event_args.owner is not None:
+        #    state_event_args.owner.add(self.renderable_object)
 
     def on_renderer_detached(self, state_event_args):
         print "Sprite Renderer detached!"
@@ -145,6 +156,15 @@ class SpriteRenderer(component.Component):
     def current_state(self):
         return self._current_state
 
+    @current_state.setter
+    def current_state(self, state):
+        if self.current_state == state:
+            return
+
+        self._current_state = state
+        self._frame_index = 0
+        self._animation_percent = 0
+
     @property
     def current_frame(self):
         return self._frame_index
@@ -152,10 +172,6 @@ class SpriteRenderer(component.Component):
     @property
     def max_frames(self):
         return self._max_frames
-
-    @property
-    def renderable_object(self):
-        return self._sprites_batch
 
 
 class GameScene(cocos.scene.Scene):
@@ -202,7 +218,11 @@ class GameScene(cocos.scene.Scene):
 
         cocos.scene.Scene.visit(self)
 
+
         print "======================"
+
+    def draw(self, *args, **kwargs):
+        time.sleep(2)
 
     @staticmethod
     def frame_count():

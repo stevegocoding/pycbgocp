@@ -52,6 +52,9 @@ class EntityRecord(cocos.cocosnode.CocosNode):
         else:
             raise Exception("Component or Entity Registry is None!")
 
+    def get_component(self, component_cls):
+        return self.entity_registry.get_component(self, component_cls)
+
     def need_sync(self):
         """
         The entity is considered out-of-sync when it is not registered

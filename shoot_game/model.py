@@ -21,15 +21,17 @@ if __name__ == "__main__":
     scene = graphics.GameScene()
     base_layer = cocos.layer.Layer()
 
-    components = [graphics.SpriteRenderer]
+    components = [graphics.SpriteRenderer, graphics.SceneComponent]
     entity.Entity.define("TestPlayerDef", components)
     player = entity.Entity.create_from_def("TestPlayerDef", "player")
 
     # Load the resource
     spritesheet_res = resource.load_spritesheet("./asset/male_walkcycle.xml")
-    sprite_renderer = entity.EntityRegistry.get_current().get_component(player, graphics.SpriteRenderer)
+    sprite_renderer = player.get_component(graphics.SpriteRenderer)
     sprite_renderer.create_layer(spritesheet_res, 0)
-    sprite_renderer.renderable_object.position = (100, 100)
+    sprite_renderer.current_state = "male_walk_w"
+    scene_component = player.get_component(graphics.SceneComponent)
+    scene_component.position = (200, 200)
     base_layer.add(player)
 
     scene.add(base_layer, z=-1)
