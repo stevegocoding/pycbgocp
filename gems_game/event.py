@@ -40,31 +40,31 @@ class ComponentSyncEventArgs(EventArgs):
                 cps.append(cp)
         return cps
 
+
 class EntityEventArgs(EventArgs):
     def __init__(self, entity_rec):
         super(EntityEventArgs, self).__init__()
-        self.entity_rec = entity_rec
+        self._entity_rec = entity_rec
 
     @property
     def entity_rec(self):
-        return self.entity_rec
+        return self._entity_rec
 
     @entity_rec.setter
     def entity_rec(self, value):
-        self.__setattr__("entity_rec", value)
+        self._entity_rec = value
 
-    def __setattr__(self, name, value):
-        self.__dict__[name] = value
 
 class ComponentStateEventArgs(EntityEventArgs):
     def __init__(self, owner, previous_owner):
         super(ComponentStateEventArgs, self).__init__(owner)
-        self.owner = owner
+        self._owner = owner
+        self._previouse_owner = previous_owner
 
     @property
-    def previouse_owner(self):
-        return self.previouse_owner
+    def previous_owner(self):
+        return self._previouse_owner
 
     @property
     def owner(self):
-        return self.owner
+        return self._owner
